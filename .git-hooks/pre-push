@@ -1,0 +1,5 @@
+#!/bin/bash
+./.git-hooks/pint-check.sh push || exit $?
+./.git-hooks/phpstan-check.sh push || exit $?
+./.git-hooks/legacy-check.sh push || true
+exit 0

@@ -1,0 +1,4 @@
+#!/bin/bash
+./.git-hooks/pint-check.sh commit || exit $?
+./.git-hooks/phpstan-check.sh commit || exit $?
+exit 0
