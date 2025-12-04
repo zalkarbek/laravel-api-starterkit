@@ -1,7 +1,14 @@
 #!/bin/bash
 set -e
 
-MODE="$1"  # commit или push
+# commit или push
+MODE="$1"
+
+# Определяем корень проекта
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+
+# путь к конфигу Pint
+PINT_CONFIG="$PROJECT_ROOT/pint.json"
 
 if [ "$MODE" = "commit" ]; then
   FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$' || true)
@@ -19,13 +26,16 @@ if [ -z "$FILES" ]; then
 fi
 
 echo "🔍 [Pint] Тест форматирования..."
-vendor/bin/pint --test $FILES
+vendor/bin/pint --config=$PINT_CONFIG --test $FILES
 RC=$?
+
 if [ $RC -ne 0 ]; then
   echo "❌ [Pint] Нарушения стиля найдены — выполняю автоисправление..."
-  vendor/bin/pint $FILES
+  vendor/bin/pint --config=$PINT_CONFIG $FILES
+
   # добавить исправленные файлы в staged (если есть)
   echo "$FILES" | xargs -r git add
+
   echo "✅ [Pint] Форматирование применено. Пожалуйста, перезапустите commit/push."
   exit 1  # вернём ошибку, чтобы пользователь повторно сделал commit после автоисправления
 fi

@@ -3,6 +3,10 @@ set -e
 
 MODE="$1"  # commit или push
 
+# Определяем корень проекта
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+
+# Собираем файлы для проверки
 if [ "$MODE" = "commit" ]; then
   FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$' || true)
 elif [ "$MODE" = "push" ]; then
@@ -13,20 +17,22 @@ else
   exit 1
 fi
 
+# Если файлов нет — выходим
 if [ -z "$FILES" ]; then
   echo "✅ [Legacy] Нет PHP-файлов для проверки."
   exit 0
 fi
 
-mkdir -p .phpstan-cache
+# Создаём кеш для хранения количества ошибок
+mkdir -p "$PROJECT_ROOT/.phpstan-cache"
 echo "🔧 [Legacy] Проверка уменьшения количества ошибок (не блокирует)."
 
 for FILE in $FILES; do
   KEY=$(echo "$FILE" | tr '/' '_')
-  PREV_FILE=".phpstan-cache/${KEY}.count"
+  PREV_FILE="$PROJECT_ROOT/.phpstan-cache/${KEY}.count"
 
-  # Получаем кол-во ошибок для конкретного файла (raw вывод => подсчёт строк)
-  CURRENT=$(vendor/bin/phpstan analyse $FILE --error-format=raw --baseline=phpstan-baseline.neon 2>/dev/null | wc -l)
+  # Получаем текущее количество ошибок для файла
+  CURRENT=$(vendor/bin/phpstan analyse "$FILE" --error-format=raw --baseline="$PROJECT_ROOT/phpstan-baseline.neon" 2>/dev/null | wc -l)
   PREVIOUS=$(cat "$PREV_FILE" 2>/dev/null || echo $CURRENT)
 
   if [ "$CURRENT" -lt "$PREVIOUS" ]; then
@@ -37,6 +43,7 @@ for FILE in $FILES; do
     echo "ℹ $FILE: без изменений ($CURRENT)"
   fi
 
+  # Сохраняем текущее количество ошибок
   echo "$CURRENT" > "$PREV_FILE"
 done
 

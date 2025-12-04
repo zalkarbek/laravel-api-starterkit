@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-MODE="$1"  # commit или push
+# commit или push
+MODE="$1"
+
+# Определяем корень проекта
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
 
 if [ "$MODE" = "commit" ]; then
   FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$' || true)
@@ -22,8 +26,9 @@ echo "🔍 [PHPStan] Анализ файлов:"
 echo "$FILES"
 
 # Запуск phpstan на списке файлов
-vendor/bin/phpstan analyse $FILES --error-format=table
+vendor/bin/phpstan analyse $FILES --error-format=table -c "$PROJECT_ROOT/phpstan.neon"
 RC=$?
+
 if [ $RC -ne 0 ]; then
   echo "❌ [PHPStan] Обнаружены ошибки. Исправьте их."
   exit $RC
