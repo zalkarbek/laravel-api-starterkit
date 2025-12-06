@@ -40,9 +40,9 @@
     "scripts": {
         "pint": "pint",
         "pint:test":  "pint --test",
-        "phpstan": "vendor/bin/phpstan analyse --memory-limit=512M",
+        "phpstan": "vendor/bin/phpstan analyse --memory-limit=1024M",
         "phpstan-baseline": "vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon",
-        "phpstan-strict": "vendor/bin/phpstan analyse --level=7 --memory-limit=512M",
+        "phpstan-strict": "vendor/bin/phpstan analyse --level=7 --memory-limit=1024M",
 
         "git-hooks:on": [
             "bash .git-hooks/install.sh"
