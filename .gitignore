@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+.composer_hash
+.npm_hash
+.migration_hash
